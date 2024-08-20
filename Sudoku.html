@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Solver</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 40px);
+            gap: 5px;
+        }
+
+        input[type="number"] {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 1.2em;
+            border: 1px solid #000;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sudoku Solver</h1>
+    <div id="sudoku-grid"></div>
+    <button id="solve-button">Solve Sudoku</button>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gridContainer = document.getElementById('sudoku-grid');
+            const solveButton = document.getElementById('solve-button');
+
+            // Create the 9x9 grid
+            for (let i = 0; i < 81; i++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.min = '1';
+                input.max = '9';
+                input.value = '';
+                gridContainer.appendChild(input);
+            }
+
+            solveButton.addEventListener('click', () => {
+                const grid = [];
+                const inputs = document.querySelectorAll('#sudoku-grid input');
+
+                // Create the grid array from inputs
+                for (let i = 0; i < 9; i++) {
+                    grid[i] = [];
+                    for (let j = 0; j < 9; j++) {
+                        grid[i][j] = parseInt(inputs[i * 9 + j].value) || 0;
+                    }
+                }
+
+                if (solveSudoku(grid)) {
+                    // Update inputs with solved grid
+                    for (let i = 0; i < 9; i++) {
+                        for (let j = 0; j < 9; j++) {
+                            inputs[i * 9 + j].value = grid[i][j];
+                        }
+                    }
+                } else {
+                    alert('No solution exists for the given Sudoku grid.');
+                }
+            });
+
+            function isValid(grid, row, col, num) {
+                for (let i = 0; i < 9; i++) {
+                    if (grid[row][i] === num || grid[i][col] === num) {
+                        return false;
+                    }
+                }
+                const startRow = Math.floor(row / 3) * 3;
+                const startCol = Math.floor(col / 3) * 3;
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        if (grid[startRow + i][startCol + j] === num) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+
+            function findEmptyLocation(grid) {
+                for (let row = 0; row < 9; row++) {
+                    for (let col = 0; col < 9; col++) {
+                        if (grid[row][col] === 0) {
+                            return [row, col];
+                        }
+                    }
+                }
+                return null;
+            }
+
+            function solveSudoku(grid) {
+                const emptyLocation = findEmptyLocation(grid);
+                if (!emptyLocation) {
+                    return true;
+                }
+                const [row, col] = emptyLocation;
+                for (let num = 1; num <= 9; num++) {
+                    if (isValid(grid, row, col, num)) {
+                        grid[row][col] = num;
+                        if (solveSudoku(grid)) {
+                            return true;
+                        }
+                        grid[row][col] = 0;
+                    }
+                }
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>
